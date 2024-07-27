@@ -3,8 +3,8 @@ import micOn from "../../assets/icons/micOn.png";
 import micOff from "../../assets/icons/micOff.png";
 import videoOn from "../../assets/icons/videoOn.png";
 import videoOff from "../../assets/icons/videoOff.png";
-import callOn from "../../assets/icons/callOn.png";
 import callOff from "../../assets/icons/callOff.png";
+import styles from "./style.module.css";
 
 function Room() {
   const [toggles, setToggles] = useState({
@@ -21,7 +21,7 @@ function Room() {
           <Frame className="h-full" toggle={toggles} />
         </div>
         <div className="side-video w-[25%] relative flex justify-center items-center p-3">
-          <div className="absolute w-full h-full top-0 left-0 bg-slate-100 opacity-[.05] rounded-lg" />
+          <div className={ styles.stripGlass +" absolute w-full h-full top-0 left-0 rounded-lg"} />
           <Frame
             className="min-h-[150px]"
             profileFrame="h-[50px] w-[50px] text-xs"
@@ -34,7 +34,8 @@ function Room() {
       <hr className="w-full opacity-10 my-3 mx-5" />
       <div
         className={
-          "navigations mx-10  flex justify-center relative items-center h-15 w-full rounded-lg p-2"
+          styles.stripGlass +
+          " mx-10  flex justify-center relative items-center h-15 w-full rounded-lg p-2"
         }
       >
         <div
@@ -76,34 +77,37 @@ function Frame(props) {
     <div
       className={`Frame border-[2px] border-white border-opacity-30 w-full overflow-hidden rounded-3xl flex justify-center items-center ${className} `}
     >
-     {toggle?.videoIcon ? <div className="relative h-full w-full">
-        <div
-          className={`absolute w-full h-[10%] bottom-0 left-0 bg-slate-900 opacity-50 rounded-b-lg ${stripClass} `}
-        />
-        <div
-          className={`px-3 flex items-center justify-between absolute w-full h-[10%] bottom-0 left-0 bg-slate-900 rounded-b-lg ${stripClass} `}
-        >
-          <p>Mubbashir</p>
-          <p>
-            <img
-              src={toggle?.micIcon ? micOn : micOff}
-              className={`h-[20px] w-[20px] ${iconStyle} `}
-            />
-          </p>
+      {toggle?.videoIcon ? (
+        <div className="relative h-full w-full">
+          <div
+            className={`${styles.stripvideoGlass} absolute w-full h-[10%] bottom-0 left-0 rounded-b-lg ${stripClass} `}
+          />
+          <div
+            className={`px-3 flex items-center justify-between absolute w-full h-[10%] bottom-0 left-0 rounded-b-lg ${stripClass} `}
+          >
+            <p>Mubbashir</p>
+            <p>
+              <img
+                src={toggle?.micIcon ? micOn : micOff}
+                className={`h-[20px] w-[20px] ${iconStyle} `}
+              />
+            </p>
+          </div>
+          <img
+            className="h-full w-full object-cover"
+            src="https://images.unsplash.com/photo-1532892939738-86e29515dc9e?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          />
         </div>
-        <img
-          className="h-full w-full object-cover"
-          src="https://images.unsplash.com/photo-1532892939738-86e29515dc9e?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        />
-      </div> : 
-      <div className="flex justify-center items-center flex-col gap-3">
-        <div
-          className={`border-[3px] border-slate-300 border-opacity-30 w-[100px] h-[100px] rounded-full ${profileFrame} `}
-        >
-          <img src="" />
+      ) : (
+        <div className="flex justify-center items-center flex-col gap-3">
+          <div
+            className={`border-[3px] border-slate-300 border-opacity-30 w-[100px] h-[100px] rounded-full ${profileFrame} `}
+          >
+            <img src="" />
+          </div>
+          <p className="name font-semibold">Mubbashir</p>
         </div>
-        <p className="name font-semibold">Mubbashir</p>
-      </div> }
+      )}
     </div>
   );
 }
