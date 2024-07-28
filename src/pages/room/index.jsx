@@ -4,6 +4,7 @@ import micOff from "../../assets/icons/micOff.png";
 import videoOn from "../../assets/icons/videoOn.png";
 import videoOff from "../../assets/icons/videoOff.png";
 import callOff from "../../assets/icons/callOff.png";
+import copyIcon from "../../assets/icons/copyIcon.png";
 import styles from "./style.module.css";
 
 function Room() {
@@ -13,15 +14,26 @@ function Room() {
     callIcon: false,
   });
 
+  const [roomId , setRoomId] = useState("roomID-123456")
+
+  const copyhandler = ()=>{
+    navigator.clipboard.writeText(roomId)
+  }
+
   console.log(toggles);
   return (
     <div className="p-5  bg-slate-950 text-white h-screen w-screen flex gap-2 flex-col  justify-center items-center">
-      <div className="flex h-[80%] w-full">
+      <div className="flex h-[75%] w-full">
         <div className="main-video w-[75%] h-full flex justify-center px-5 items-center">
           <Frame className="h-full" toggle={toggles} />
         </div>
         <div className="side-video w-[25%] relative flex justify-center items-center p-3">
-          <div className={ styles.stripGlass +" absolute w-full h-full top-0 left-0 rounded-lg"} />
+          <div
+            className={
+              styles.stripGlass +
+              " absolute w-full h-full top-0 left-0 rounded-lg"
+            }
+          />
           <Frame
             className="min-h-[150px]"
             profileFrame="h-[50px] w-[50px] text-xs"
@@ -31,7 +43,15 @@ function Room() {
           />
         </div>
       </div>
-      <hr className="w-full opacity-10 my-3 mx-5" />
+      <div className="flex self-start w-full gap-5 items-center my-3">
+        <div className={styles.stripGlass + " w-[20%] flex  justify-between rounded-lg px-2 p-1"}>
+          <p>{roomId ?? null}</p>
+          <span className="flex justify-center items-center self-end border-s border-white/20 ps-2 cursor-pointer" onClick={copyhandler}>
+            <img src={copyIcon} className="h-[20px] w-20px mb-[2px]" />
+          </span>
+        </div>
+        <hr className="w-full opacity-10 " />
+      </div>
       <div
         className={
           styles.stripGlass +
