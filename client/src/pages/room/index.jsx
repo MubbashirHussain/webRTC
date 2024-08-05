@@ -49,12 +49,12 @@ function Room() {
         <div
           className={
             styles.stripGlass +
-            " w-[20%] flex  justify-between rounded-lg px-2 p-1"
+            " flex min-w-fit justify-between rounded-lg px-2 p-1"
           }
         >
           <p>{roomId ?? null}</p>
           <span
-            className="flex justify-center items-center self-end border-s border-white/20 ps-2 cursor-pointer"
+            className="flex justify-center items-center self-end border-s border-white/20 ms-2 ps-2 cursor-pointer"
             onClick={copyhandler}
           >
             <img src={copyIcon} className="h-[20px] w-20px mb-[2px]" />
@@ -105,7 +105,7 @@ function Frame(props) {
   let { className, profileFrame, stripClass, iconStyle, toggle } = props;
   return (
     <div
-      className={`Frame border-[2px] border-white border-opacity-30 w-full overflow-hidden rounded-3xl flex justify-center items-center ${className} `}
+      className={`Frame relative border-[2px] border-white border-opacity-30 w-full overflow-hidden rounded-3xl flex justify-center items-center ${className} `}
     >
       {toggle?.videoIcon ? (
         <div className="relative h-full w-full">
