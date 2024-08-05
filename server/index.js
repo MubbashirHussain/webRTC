@@ -1,16 +1,18 @@
 require('dotenv').config();
 const express = require('express')
 const app = express();
-const { Server } = require("socket.io");
+const http = require("http");
+const cors = require("cors");
+const socketio = require("./functions/socket");
+const bodyParser = require('body-parser');
+app.use(cors());
+app.use(bodyParser.json());
 
-const io = new Server();
-
-io.on('connection', (socket) => {
-    console.log('a user connected');
-});
+let server = http.createServer(app);
+socketio(server)
 
 
 app.get('/', (req, res) => { res.send("API is working") });
 
 
-app.listen(process.env.PORT || 8000, () => console.log("server is Runing at PORT " + process.env.PORT))
+server.listen(process.env.PORT || 3001, function () { console.log("server is Runing at PORT " + process.env.PORT) })

@@ -1,10 +1,13 @@
-import React from 'react'
-import Approuter from './config/router'
+import React from "react";
+import Approuter from "./config/router";
+import SocketProvider from "./providers/socket";
 
 function App() {
   return (
-    <Approuter />
-  )
+    <SocketProvider>
+      <Approuter />
+    </SocketProvider>
+  );
 }
 
-export default App
+export default App;

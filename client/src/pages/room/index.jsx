@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import micOn from "../../assets/icons/micOn.png";
 import micOff from "../../assets/icons/micOff.png";
 import videoOn from "../../assets/icons/videoOn.png";
@@ -8,17 +9,18 @@ import copyIcon from "../../assets/icons/copyIcon.png";
 import styles from "./style.module.css";
 
 function Room() {
+  let location = useLocation();
+  let { roomId } = location.state;
+  console.log("================= ", roomId);
   const [toggles, setToggles] = useState({
     videoIcon: true,
     micIcon: false,
     callIcon: false,
   });
 
-  const [roomId , setRoomId] = useState("roomID-123456")
-
-  const copyhandler = ()=>{
-    navigator.clipboard.writeText(roomId)
-  }
+  const copyhandler = () => {
+    navigator.clipboard.writeText(roomId);
+  };
 
   console.log(toggles);
   return (
@@ -44,9 +46,17 @@ function Room() {
         </div>
       </div>
       <div className="flex self-start w-full gap-5 items-center my-3">
-        <div className={styles.stripGlass + " w-[20%] flex  justify-between rounded-lg px-2 p-1"}>
+        <div
+          className={
+            styles.stripGlass +
+            " w-[20%] flex  justify-between rounded-lg px-2 p-1"
+          }
+        >
           <p>{roomId ?? null}</p>
-          <span className="flex justify-center items-center self-end border-s border-white/20 ps-2 cursor-pointer" onClick={copyhandler}>
+          <span
+            className="flex justify-center items-center self-end border-s border-white/20 ps-2 cursor-pointer"
+            onClick={copyhandler}
+          >
             <img src={copyIcon} className="h-[20px] w-20px mb-[2px]" />
           </span>
         </div>
