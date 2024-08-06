@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import ReactPlayer from "react-player";
 import micOn from "../../assets/icons/micOn.png";
 import micOff from "../../assets/icons/micOff.png";
 import videoOn from "../../assets/icons/videoOn.png";
@@ -7,11 +8,19 @@ import videoOff from "../../assets/icons/videoOff.png";
 import callOff from "../../assets/icons/callOff.png";
 import copyIcon from "../../assets/icons/copyIcon.png";
 import styles from "./style.module.css";
+import { useSocket } from "../../providers/socket";
+import { usePeer } from "../../providers/peer";
 
 function Room() {
   let location = useLocation();
   let { roomId } = location.state;
-  console.log("================= ", roomId);
+  let { peer, createOffer, createAns } = usePeer();
+  let socket = useSocket();
+
+  const [remoteSocketId, setRemoteSocketId] = useState(null);
+  const [myStream, setMyStream] = useState();
+  const [remoteStream, setRemoteStream] = useState();
+
   const [toggles, setToggles] = useState({
     videoIcon: true,
     micIcon: false,
@@ -22,7 +31,38 @@ function Room() {
     navigator.clipboard.writeText(roomId);
   };
 
-  console.log(toggles);
+  const userJoinedHandler = async ({ email, socketId }) => {
+    console.log(`Email ${email} joined room`);
+    setRemoteSocketId(socketId);
+    let offer = await createOffer();
+    socket.emit("call-user", { socketId, email, offer });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    setMyStream(stream);
+  };
+
+  const incomingCallHandler = async ({ socketId, email, offer }) => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    console.log("Incommming Call From", socketId, from, offer);
+    let Ans = await createAns();
+    setMyStream(stream);
+    socket.emit("call-accepted", { to: from, Ans });
+  };
+  useEffect(() => {
+    socket.on("user-joined", userJoinedHandler);
+    socket.on("incoming-call", incomingCallHandler);
+
+    return () => {
+      socket.off("incoming-call", incomingCallHandler);
+      socket.off("user-joined", userJoinedHandler);
+    };
+  }, [userJoinedHandler, incomingCallHandler]);
+
   return (
     <div className="p-5  bg-slate-950 text-white h-screen w-screen flex gap-2 flex-col  justify-center items-center">
       <div className="flex h-[75%] w-full">
@@ -37,6 +77,7 @@ function Room() {
             }
           />
           <Frame
+            stream={myStream}
             className="min-h-[150px]"
             profileFrame="h-[50px] w-[50px] text-xs"
             stripClass="text-xs h-[15%]"
@@ -102,7 +143,7 @@ function Room() {
 }
 
 function Frame(props) {
-  let { className, profileFrame, stripClass, iconStyle, toggle } = props;
+  let { className, profileFrame, stripClass, iconStyle, toggle  , stream} = props;
   return (
     <div
       className={`Frame relative border-[2px] border-white border-opacity-30 w-full overflow-hidden rounded-3xl flex justify-center items-center ${className} `}
@@ -123,9 +164,9 @@ function Frame(props) {
               />
             </p>
           </div>
-          <img
+          <ReactPlayer url={stream} playing
             className="h-full w-full object-cover"
-            src="https://images.unsplash.com/photo-1532892939738-86e29515dc9e?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            // src="https://images.unsplash.com/photo-1532892939738-86e29515dc9e?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           />
         </div>
       ) : (

@@ -5,8 +5,7 @@ import { useSocket } from "../../providers/socket";
 function Home() {
   let socket = useSocket();
   let navigate = useNavigate();
-  const [formData, setFromData] = useState({});
-
+  
   let emailRef = useRef(null);
   let roomIdRef = useRef(null);
 
