@@ -22,14 +22,18 @@ module.exports = function (server) {
             emailToSockeId.set(email, socket.id)
             socket.join(roomId)
             socket.emit('joined-room', { email, roomId, socketId: socket.id })
-            socket.broadcast.to(roomId).emit('user-joined', { email, roomId, socketId: socket.id })
+            io.to(roomId).emit('user-joined', { email, roomId, socketId: socket.id })
             console.log(emailToSockeId)
         })
         socket.on('call-user', (data) => {
-            let { email, offer, socketId } = data
-            sockeIdToEmail.set(socketId, email)
-            console.log("call-user", email)
-            socket.to(socketId).emit('incoming-call', { from: email, socketId, offer })
+            let { offer, to } = data
+            console.log("incomming call from", to)
+            io.to(to).emit('incoming-call', { from: socket.id, offer })
+        })
+        socket.on("call-accepted", ({ to, Ans }) => {
+            let fromEmail = sockeIdToEmail.get(socket.id)
+            console.log("Email From", fromEmail)
+            io.to(to).emit('call-accepted', { from: socket.id, fromEmail, Ans })
         })
     })
 }

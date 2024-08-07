@@ -18,21 +18,28 @@ export default function PeerProvider(props) {
     ],
   });
 
-  let createOffer = () => {
-    let offer = peer.createOffer();
-    peer.setLocalDescription(offer);
+  let createOffer = async () => {
+    let offer = await peer.createOffer();
+    peer.setLocalDescription(new RTCSessionDescription(offer));
     return offer;
   };
 
-  let createAns = (offer) => {
+  let createAns = async (offer) => {
     peer.setRemoteDescription(offer);
-    let ans = peer.createAnswer();
-    peer.setLocalDescription(ans);
+    let ans = await peer.createAnswer();
+    console.log("Peer Ans", ans);
+    peer.setLocalDescription(new RTCSessionDescription(ans));
     return ans;
   };
 
+  let setRemoteDescription = async (ans) => {
+    await peer.setRemoteDescription(new RTCSessionDescription(ans));
+  };
+
   return (
-    <PeerContext.Provider value={{ peer, createOffer  , createAns}}>
+    <PeerContext.Provider
+      value={{ peer, createOffer, createAns, setRemoteDescription }}
+    >
       {props.children}
     </PeerContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import ReactPlayer from "react-player";
 import micOn from "../../assets/icons/micOn.png";
@@ -14,7 +14,7 @@ import { usePeer } from "../../providers/peer";
 function Room() {
   let location = useLocation();
   let { roomId } = location.state;
-  let { peer, createOffer, createAns } = usePeer();
+  let { peer, createOffer, createAns, setRemoteDescription } = usePeer();
   let socket = useSocket();
 
   const [remoteSocketId, setRemoteSocketId] = useState(null);
@@ -34,40 +34,82 @@ function Room() {
   const userJoinedHandler = async ({ email, socketId }) => {
     console.log(`Email ${email} joined room`);
     setRemoteSocketId(socketId);
+
     let offer = await createOffer();
-    socket.emit("call-user", { socketId, email, offer });
+    console.log("myOffer", offer);
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
     setMyStream(stream);
+    socket.emit("call-user", { to: socketId, offer });
   };
 
-  const incomingCallHandler = async ({ socketId, email, offer }) => {
+  const incomingCallHandler = async ({ from, offer }) => {
+    console.log("Incommming Call From", from, offer);
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true,
     });
-    console.log("Incommming Call From", socketId, from, offer);
-    let Ans = await createAns();
+
+    let Ans = await createAns(offer);
     setMyStream(stream);
     socket.emit("call-accepted", { to: from, Ans });
   };
+
+  const sendStream = useCallback(() => {
+  console.log("MyStream --------------- " , myStream)
+  if(!myStream) return
+    for (const track of myStream?.getTracks()) {
+      peer.addTrack(track, myStream);
+    }
+  }, [myStream]);
+
+  const callAcceptedHandler = useCallback(async ({ from, fromEmail, Ans }) => {
+    console.log("call Accepted by ", fromEmail, from, Ans);
+    await setRemoteDescription(Ans);
+    sendStream();
+    console.log("now you Both Are Connected");
+  } ,[])
+
+  let needNegoHandle = () => {
+    console.log("negotiationneeded");
+  };
+
   useEffect(() => {
     socket.on("user-joined", userJoinedHandler);
     socket.on("incoming-call", incomingCallHandler);
+    socket.on("call-accepted", callAcceptedHandler);
 
     return () => {
+      socket.off("call-accepted", callAcceptedHandler);
       socket.off("incoming-call", incomingCallHandler);
       socket.off("user-joined", userJoinedHandler);
     };
   }, [userJoinedHandler, incomingCallHandler]);
 
+  useEffect(() => {
+    console.log("Peer -------------------- :", peer);
+    peer.addEventListener("negotiationneeded", needNegoHandle);
+    return () => {
+      peer.removeEventListener("negotiationneeded", needNegoHandle);
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log("USE Effect ");
+    peer.addEventListener("track", async (ev) => {
+      const remoteStream = ev.streams;
+      console.log("GOT TRACKS!!");
+      setRemoteStream(remoteStream[0]);
+    });
+  }, []);
+
   return (
     <div className="p-5  bg-slate-950 text-white h-screen w-screen flex gap-2 flex-col  justify-center items-center">
       <div className="flex h-[75%] w-full">
         <div className="main-video w-[75%] h-full flex justify-center px-5 items-center">
-          <Frame className="h-full" toggle={toggles} />
+          <Frame className="h-full" stream={remoteStream} toggle={toggles} />
         </div>
         <div className="side-video w-[25%] relative flex justify-center items-center p-3">
           <div
@@ -143,7 +185,8 @@ function Room() {
 }
 
 function Frame(props) {
-  let { className, profileFrame, stripClass, iconStyle, toggle  , stream} = props;
+  let { className, profileFrame, stripClass, iconStyle, toggle, stream } =
+    props;
   return (
     <div
       className={`Frame relative border-[2px] border-white border-opacity-30 w-full overflow-hidden rounded-3xl flex justify-center items-center ${className} `}
@@ -164,8 +207,12 @@ function Frame(props) {
               />
             </p>
           </div>
-          <ReactPlayer url={stream} playing
-            className="h-full w-full object-cover"
+          <ReactPlayer
+            width={520}
+            url={stream}
+            playing
+            muted={!toggle.micIcon}
+            className=" border-[5px] border-red-600 h-full w-full object-cover"
             // src="https://images.unsplash.com/photo-1532892939738-86e29515dc9e?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           />
         </div>
