@@ -35,5 +35,14 @@ module.exports = function (server) {
             console.log("Email From", fromEmail)
             io.to(to).emit('call-accepted', { from: socket.id, fromEmail, Ans })
         })
+        socket.on("nego-needed", ({ to, offer }) => {
+            console.log("Email to", to)
+            io.to(to).emit('nego-needed', { from: socket.id, offer })
+        })
+        socket.on("nego-done", ({ to, Ans }) => {
+            console.log("Email From",)
+            io.to(to).emit('nego-final', { from: socket.id, Ans })
+        })
+
     })
 }

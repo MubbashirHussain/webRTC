@@ -19,14 +19,20 @@ export default function PeerProvider(props) {
   });
 
   let createOffer = async () => {
-    let offer = await peer.createOffer();
+    let offer = await peer.createOffer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true,
+    });
     peer.setLocalDescription(new RTCSessionDescription(offer));
     return offer;
   };
 
   let createAns = async (offer) => {
     peer.setRemoteDescription(offer);
-    let ans = await peer.createAnswer();
+    let ans = await peer.createAnswer({
+      offerToReceiveAudio: true,
+      offerToReceiveVideo: true,
+    });
     console.log("Peer Ans", ans);
     peer.setLocalDescription(new RTCSessionDescription(ans));
     return ans;
