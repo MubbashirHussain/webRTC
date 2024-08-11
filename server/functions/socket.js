@@ -25,24 +25,34 @@ module.exports = function (server) {
             io.to(roomId).emit('user-joined', { email, roomId, socketId: socket.id })
             console.log(emailToSockeId)
         })
-        socket.on('call-user', (data) => {
+        socket.on('call-user', (data) => { // user 1
             let { offer, to } = data
             console.log("incomming call from", to)
             io.to(to).emit('incoming-call', { from: socket.id, offer })
         })
-        socket.on("call-accepted", ({ to, Ans }) => {
+        socket.on("call-accepted", ({ to, Ans }) => { // user 2
             let fromEmail = sockeIdToEmail.get(socket.id)
-            console.log("Email From", fromEmail)
-            io.to(to).emit('call-accepted', { from: socket.id, fromEmail, Ans })
+            console.log("Email From", to)
+            io.to(to).emit('call-accepted', { from: socket.id, Ans })
         })
-        socket.on("nego-needed", ({ to, offer }) => {
+        socket.on("call-Connected", ({ to }) => {
+            let fromEmail = sockeIdToEmail.get(to)
+            console.log("call Connected", fromEmail)
+            io.to(to).emit('call-Connected', { from: socket.id, to })
+        })
+
+        socket.on("nego-needed", ({ to, offer }) => {  // user 1
             console.log("Email to", to)
-            io.to(to).emit('nego-needed', { from: socket.id, offer })
+            io.to(to).emit('nego-incoming', { from: socket.id, offer })
         })
-        socket.on("nego-done", ({ to, Ans }) => {
+        socket.on("nego-done", ({ to, Ans }) => { // user 2
             console.log("Email From",)
             io.to(to).emit('nego-final', { from: socket.id, Ans })
         })
-
+        socket.on("icecandidate", candidate => {
+            console.log({ candidate });
+            //broadcast to other peers
+            socket.broadcast.emit("icecandidate", candidate);
+        });
     })
 }
